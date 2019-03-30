@@ -1,0 +1,4 @@
+﻿  Source.cpp
+c:\users\usuario\documents\visual studio 2015\projects\project2\project2\source.cpp(188): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
+  Project2.vcxproj -> C:\Users\Usuario\Documents\Visual Studio 2015\Projects\Project2\Debug\Project2.exe
+  Project2.vcxproj -> C:\Users\Usuario\Documents\Visual Studio 2015\Projects\Project2\Debug\Project2.pdb (Partial PDB)
