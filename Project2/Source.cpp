@@ -467,7 +467,7 @@ void TextureFill(char provincia[10])
 						glVertex2i(x2, i);
 
 						glEnd();
-						glFlush();
+						//glFlush();
 					
 
 
@@ -607,7 +607,7 @@ void ScanlineFill(float R, float G, float B)
 					glVertex2i(x2,i); 
 				
 					glEnd(); 
-					glFlush();		 
+					//glFlush();		 
 				
 			
 				} 
@@ -636,7 +636,7 @@ void myInit(void)
 	glLoadIdentity(); 
 	gluOrtho2D(0,maxHt,0,maxWd); 
 	glClear(GL_COLOR_BUFFER_BIT); 
-	//initialiseTextures();
+	initialiseTextures();
 } 
 
 void drawPolyDino(char x[100]) 
@@ -677,7 +677,7 @@ void drawPolyDino(char x[100])
 			storeEdgeInTable(x1, y1, x2, y2);//storage of edges in edge table. 
 			
 			
-			glFlush(); 
+			//glFlush(); 
 		} 
 	} 
 		
@@ -764,6 +764,7 @@ void menu(int i)
 		glClear(GL_COLOR_BUFFER_BIT);
 		glFlush();
 		dibujarSinColor();
+		glFlush();
 		modo = 1;
 		
 	}
@@ -773,18 +774,18 @@ void menu(int i)
 		glClear(GL_COLOR_BUFFER_BIT);
 		glFlush();
 		dibujarColor();
-		
+		glFlush();
 		modo = 2;
 	
 	}
 	else if (i == 3) {
-		//gl(GL_TEXTURE_2D);
+		glEnable(GL_TEXTURE_2D);
 		glPushMatrix();
 		glClear(GL_COLOR_BUFFER_BIT);
 		glFlush();
 		initialiseTextures();
 		dibujarTextura();
-
+		glFlush();
 		modo = 3;
 	}
 	else if (i == 4) {
@@ -801,6 +802,7 @@ void menu(int i)
 			dibujarTextura();
 		}
 		glPushMatrix();
+		glFlush();
 	}
 	else if (i == 5) {
 		exit(1);
