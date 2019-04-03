@@ -797,9 +797,12 @@ void menu(int i)
 		else if (modo == 2) {
 			dibujarColor();
 		}
+		else if (modo == 3) {
+			dibujarTextura();
+		}
 		glPushMatrix();
 	}
-	else if (i == 4) {
+	else if (i == 5) {
 		exit(1);
 	}
 	
