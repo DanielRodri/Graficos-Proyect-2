@@ -10,9 +10,12 @@
 #include <conio.h>
 #include <math.h> 
 #include <GL/glut.h> 
-#define maxHt 350 
-#define maxWd 350 
-#define maxVer 500 
+#include <iostream>
+using namespace std;
+#define maxHt 500 
+#define maxWd 500 
+#define maxVer 3500 
+
 
 FILE *fp; 
 int modo = 0;
@@ -667,10 +670,11 @@ void drawPolyDino(char x[100])
 			fscanf_s(fp, "%d,%d", &x2, &y2); 
 			
 			glBegin(GL_LINES); 
-				glVertex2i( x1, y1); 
-				glVertex2i( x2, y2); 
+			glVertex2i(x1, y1);
+
+			glVertex2i(x2, y2);
 			glEnd(); 
-			storeEdgeInTable(x1+100, y1, x2+100, y2);//storage of edges in edge table. 
+			storeEdgeInTable(x1, y1, x2, y2);//storage of edges in edge table. 
 			
 			
 			glFlush(); 
@@ -679,6 +683,77 @@ void drawPolyDino(char x[100])
 		
 		
 } 
+void dibujarColor() {
+	initEdgeTable();
+	drawPolyDino("alajuela.txt");
+	ScanlineFill(1.0, 0.0, 0.0);
+	initEdgeTable();
+	drawPolyDino("heredia.txt");
+	ScanlineFill(1.0, 1.0, 0.0);
+	initEdgeTable();
+	drawPolyDino("sanjose.txt");
+	ScanlineFill(1.0, 0.0, 1.0);
+	initEdgeTable();
+	drawPolyDino("cartago.txt");
+	ScanlineFill(0.0, 1.0, 1.0);
+	initEdgeTable();
+	drawPolyDino("limon.txt");
+	ScanlineFill(0.5, 1.0, 0.5);
+	initEdgeTable();
+	drawPolyDino("puntarenas.txt");
+	ScanlineFill(1.0, 0.5, 0.0);
+	initEdgeTable();
+	drawPolyDino("Guanacaste.txt");
+	ScanlineFill(0.0, 1.0, 0.0);
+}
+
+void dibujarSinColor() {
+
+	drawPolyDino("alajuela.txt");
+
+	drawPolyDino("heredia.txt");
+
+	drawPolyDino("sanjose.txt");
+
+	drawPolyDino("cartago.txt");
+
+	drawPolyDino("limon.txt");
+
+	drawPolyDino("puntarenas.txt");
+
+	drawPolyDino("Guanacaste.txt");
+
+}
+
+void dibujarTextura() {
+	initEdgeTable();
+	drawPolyDino("alajuela.txt");
+	TextureFill("alajuela.txt");
+
+	initEdgeTable();
+	drawPolyDino("heredia.txt");
+	TextureFill("heredia.txt");
+
+	initEdgeTable();
+	drawPolyDino("sanjose.txt");
+	TextureFill("sanjose.txt");
+
+	initEdgeTable();
+	drawPolyDino("cartago.txt");
+	TextureFill("cartago.txt");
+
+	initEdgeTable();
+	drawPolyDino("limon.txt");
+	TextureFill("limon.txt");
+
+	initEdgeTable();
+	drawPolyDino("puntarenas.txt");
+	TextureFill("puntarenas.txt");
+
+	initEdgeTable();
+	drawPolyDino("Guanacaste.txt");
+	TextureFill("Guanacaste.txt");
+}
 
 void menu(int i) 
 {
@@ -701,7 +776,13 @@ void menu(int i)
 	
 	}
 	else if (i == 3) {
-	
+		glPushMatrix();
+		glClear(GL_COLOR_BUFFER_BIT);
+		glFlush();
+		initialiseTextures();
+		dibujarTextura();
+
+		modo = 3;
 	}
 	else if (i == 4) {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -743,6 +824,9 @@ void teclado(unsigned char key, int x, int y) {
 			else if (modo == 2) {
 				dibujarColor();
 			}
+			else if (modo == 3) {
+				dibujarTextura();
+			}
 			glFlush();
 
 
@@ -758,6 +842,9 @@ void teclado(unsigned char key, int x, int y) {
 			}
 			else if (modo == 2) {
 				dibujarColor();
+			}
+			else if (modo == 3) {
+				dibujarTextura();
 			}
 			glFlush();
 
@@ -776,6 +863,9 @@ void teclado(unsigned char key, int x, int y) {
 			else if (modo == 2) {
 				dibujarColor();
 			}
+			else if (modo == 3) {
+				dibujarTextura();
+			}
 
 			glFlush();
 			printf("\r\n Zoom out");
@@ -791,6 +881,9 @@ void teclado(unsigned char key, int x, int y) {
 			}
 			else if (modo == 2) {
 				dibujarColor();
+			}
+			else if (modo == 3) {
+				dibujarTextura();
 			}
 			glFlush();
 			printf("\r\n Zoom in");
@@ -820,6 +913,9 @@ void pan(int key, int x, int y) {
 			else if (modo == 2) {
 				dibujarColor();
 			}
+			else if (modo == 3) {
+				dibujarTextura();
+			}
 			glFlush();
 			break;
 
@@ -832,6 +928,9 @@ void pan(int key, int x, int y) {
 			}
 			else if (modo == 2) {
 				dibujarColor();
+			}
+			else if (modo == 3) {
+				dibujarTextura();
 			}
 			glFlush();
 			break;
@@ -847,6 +946,9 @@ void pan(int key, int x, int y) {
 			else if (modo == 2) {
 				dibujarColor();
 			}
+			else if (modo == 3) {
+				dibujarTextura();
+			}
 			glFlush();
 			break;
 
@@ -860,6 +962,9 @@ void pan(int key, int x, int y) {
 			}
 			else if (modo == 2) {
 				dibujarColor();
+			}
+			else if (modo == 3) {
+				dibujarTextura();
 			}
 			glFlush();
 			break;
@@ -895,46 +1000,6 @@ void main(int argc, char** argv)
 	glutMainLoop(); 
 	fclose(fp); 
 } 
-
-
-#include <iostream>
-using namespace std;
-#define maxHt 350 
-#define maxWd 350 
-#define maxVer 500 
-			
-				glVertex2i( x1, y1); 
 				
-				glVertex2i( x2, y2); 
 
-		glClear(GL_COLOR_BUFFER_BIT);
-		glFlush();
-		initialiseTextures();
-
-		initEdgeTable();
-		drawPolyDino("alajuela.txt");
-		TextureFill("alajuela.txt");
-
-		initEdgeTable();
-		drawPolyDino("heredia.txt");
-		TextureFill("heredia.txt");
-
-		initEdgeTable();
-		drawPolyDino("sanjose.txt");
-		TextureFill("sanjose.txt");
-
-		initEdgeTable();
-		drawPolyDino("cartago.txt");
-		TextureFill("cartago.txt");
-
-		initEdgeTable();
-		drawPolyDino("limon.txt");
-		TextureFill("limon.txt");
-
-		initEdgeTable();
-		drawPolyDino("puntarenas.txt");
-		TextureFill("puntarenas.txt");
-
-		initEdgeTable();
-		drawPolyDino("Guanacaste.txt");
-		TextureFill("Guanacaste.txt");
+		
