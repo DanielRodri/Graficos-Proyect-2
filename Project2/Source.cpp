@@ -759,6 +759,7 @@ void menu(int i)
 {
 	
 	if (i == 1) {
+		glDisable(GL_TEXTURE_2D);
 		glPushMatrix();
 		glClear(GL_COLOR_BUFFER_BIT);
 		glFlush();
@@ -767,6 +768,7 @@ void menu(int i)
 		
 	}
 	else if(i == 2) {
+		glDisable(GL_TEXTURE_2D);
 		glPushMatrix();
 		glClear(GL_COLOR_BUFFER_BIT);
 		glFlush();
@@ -776,6 +778,7 @@ void menu(int i)
 	
 	}
 	else if (i == 3) {
+		//gl(GL_TEXTURE_2D);
 		glPushMatrix();
 		glClear(GL_COLOR_BUFFER_BIT);
 		glFlush();
