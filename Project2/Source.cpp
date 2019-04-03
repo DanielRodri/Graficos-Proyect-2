@@ -2,14 +2,15 @@
 // Scanline Polygon fill Algorithm 
 
 #include <stdio.h> 
+#include <conio.h>
 #include <math.h> 
 #include <GL/glut.h> 
-#define maxHt 350 
-#define maxWd 350 
-#define maxVer 500 
+#define maxHt 500 
+#define maxWd 500
+#define maxVer 3500 
 
 FILE *fp; 
-
+int modo = 0;
 // Start from lower left corner 
 typedef struct edgebucket 
 { 
@@ -51,6 +52,7 @@ void initEdgeTable()
 void insertionSort(EdgeTableTuple *ett) 
 { 
 	int i,j; 
+	
 	EdgeBucket temp; 
 
 	for (i = 1; i < ett->countEdgeBucket; i++) 
@@ -308,7 +310,7 @@ void myInit(void)
 	glClear(GL_COLOR_BUFFER_BIT); 
 } 
 
-void drawPolyDino(char x[10]) 
+void drawPolyDino(char x[100]) 
 { 
 
 	errno_t err;
@@ -337,12 +339,12 @@ void drawPolyDino(char x[10])
 		else
 		{ 
 			fscanf_s(fp, "%d,%d", &x2, &y2); 
-		 
+			
 			glBegin(GL_LINES); 
-				glVertex2i( x1, y1); 
-				glVertex2i( x2, y2); 
+				glVertex2i( x1+100, y1); 
+				glVertex2i( x2+100, y2); 
 			glEnd(); 
-			storeEdgeInTable(x1, y1, x2, y2);//storage of edges in edge table. 
+			storeEdgeInTable(x1+100, y1, x2+100, y2);//storage of edges in edge table. 
 			
 			
 			glFlush(); 
@@ -352,41 +354,89 @@ void drawPolyDino(char x[10])
 		
 } 
 
+void dibujarColor() {
+	initEdgeTable();
+	drawPolyDino("alajuela.txt");
+	ScanlineFill(1.0, 0.0, 0.0);
+	initEdgeTable();
+	drawPolyDino("heredia.txt");
+	ScanlineFill(1.0, 1.0, 0.0);
+	initEdgeTable();
+	drawPolyDino("sanjose.txt");
+	ScanlineFill(1.0, 0.0, 1.0);
+	initEdgeTable();
+	drawPolyDino("cartago.txt");
+	ScanlineFill(0.0, 1.0, 1.0);
+	initEdgeTable();
+	drawPolyDino("limon.txt");
+	ScanlineFill(0.5, 1.0, 0.5);
+	initEdgeTable();
+	drawPolyDino("puntarenas.txt");
+	ScanlineFill(1.0, 0.5, 0.0);
+	initEdgeTable();
+	drawPolyDino("Guanacaste.txt");
+	ScanlineFill(0.0, 1.0, 0.0);
+}
+
+void dibujarSinColor() {
+	
+	drawPolyDino("alajuela.txt");
+	
+	drawPolyDino("heredia.txt");
+	
+	drawPolyDino("sanjose.txt");
+	
+	drawPolyDino("cartago.txt");
+	
+	drawPolyDino("limon.txt");
+	
+	drawPolyDino("puntarenas.txt");
+	
+	drawPolyDino("Guanacaste.txt");
+
+
+
+}
+
+
+
+
+
+
 void menu(int i) 
-{ 
+{
+	
 	if (i == 1) {
+		glPushMatrix();
 		glClear(GL_COLOR_BUFFER_BIT);
 		glFlush();
-		drawPolyDino("costarica.txt");
-		
+		dibujarSinColor();
+		modo = 1;
 		
 	}
 	else if(i == 2) {
-		initEdgeTable(); 
-		drawPolyDino("alajuela.txt");
-		ScanlineFill(1.0,0.0,0.0);
-		initEdgeTable();
-		drawPolyDino("heredia.txt");
-		ScanlineFill(1.0, 1.0, 0.0);
-		initEdgeTable();
-		drawPolyDino("sanjose.txt");
-		ScanlineFill(1.0, 0.0, 1.0);
-		initEdgeTable();
-		drawPolyDino("cartago.txt");
-		ScanlineFill(0.0, 1.0, 1.0);
-		initEdgeTable();
-		drawPolyDino("limon.txt");
-		ScanlineFill(0.5, 1.0, 0.5);
-		initEdgeTable();
-		drawPolyDino("puntarenas.txt");
-		ScanlineFill(1.0, 0.5, 0.0);
-		initEdgeTable();
-		drawPolyDino("Guanacaste.txt");
-		ScanlineFill(0.0, 1.0, 0.0);
+		glPushMatrix();
+		glClear(GL_COLOR_BUFFER_BIT);
+		glFlush();
+		dibujarColor();
+		
+		modo = 2;
 	
 	}
 	else if (i == 3) {
-	
+		
+	}
+	else if (i == 4) {
+		glClear(GL_COLOR_BUFFER_BIT);
+		glFlush();
+		glPopMatrix();
+		if (modo == 1) {
+			dibujarSinColor();
+		}
+		else if (modo == 2) {
+			dibujarColor();
+		}
+		glPushMatrix();
 	}
 	else if (i == 4) {
 		exit(1);
@@ -394,6 +444,156 @@ void menu(int i)
 	
 	
 } 
+
+
+
+void teclado(unsigned char key, int x, int y) {
+	
+	if (modo != 0) {
+		switch (key)
+		{
+
+
+		case 'a': //izquierda
+			glClear(GL_COLOR_BUFFER_BIT);
+			glFlush();
+			glTranslatef(250, 20, 0.0f);
+			glRotatef(65, 0.0f, 0.0f, 1.0f);
+
+			if (modo == 1) {
+				dibujarSinColor();
+			}
+			else if (modo == 2) {
+				dibujarColor();
+			}
+			glFlush();
+
+
+			printf("\r\n Presiono Flecha izquierda");
+			break;
+		case 'd':
+			glClear(GL_COLOR_BUFFER_BIT);
+			glFlush();
+			glTranslatef(20, 250, 0.0f);
+			glRotatef(-65, 0.0f, 0.0f, 1.0f);
+			if (modo == 1) {
+				dibujarSinColor();
+			}
+			else if (modo == 2) {
+				dibujarColor();
+			}
+			glFlush();
+
+
+			printf("\r\n Presiono Flecha izquierda");
+			break;
+		case 'z':
+			glClear(GL_COLOR_BUFFER_BIT);
+			glFlush();
+
+			glTranslatef(100.0, 75.0, 0.0f);
+			glScalef(0.5, 0.5, 0.0);
+			if (modo == 1) {
+				dibujarSinColor();
+			}
+			else if (modo == 2) {
+				dibujarColor();
+			}
+
+			glFlush();
+			printf("\r\n Zoom out");
+			break;
+
+		case 'x':
+			glClear(GL_COLOR_BUFFER_BIT);
+			glFlush();
+			glTranslatef(-100.0, -75.0, 0.0f);
+			glScalef(1.5, 1.5, 0.0);
+			if (modo == 1) {
+				dibujarSinColor();
+			}
+			else if (modo == 2) {
+				dibujarColor();
+			}
+			glFlush();
+			printf("\r\n Zoom in");
+			break;
+
+
+
+		}
+	}
+}
+
+
+void pan(int key, int x, int y) {
+
+	if (modo != 0) {
+		switch (key)
+		{
+
+
+		case GLUT_KEY_UP:
+			glClear(GL_COLOR_BUFFER_BIT);
+			glFlush();
+			glTranslatef(0.0, 20, 0.0f);
+			if (modo == 1) {
+				dibujarSinColor();
+			}
+			else if (modo == 2) {
+				dibujarColor();
+			}
+			glFlush();
+			break;
+
+		case GLUT_KEY_DOWN:
+			glClear(GL_COLOR_BUFFER_BIT);
+			glFlush();
+			glTranslatef(0.0, -20, 0.0f);
+			if (modo == 1) {
+				dibujarSinColor();
+			}
+			else if (modo == 2) {
+				dibujarColor();
+			}
+			glFlush();
+			break;
+
+		case GLUT_KEY_LEFT:
+			glClear(GL_COLOR_BUFFER_BIT);
+			glFlush();
+
+			glTranslatef(-20, 0.0, 0.0f);
+			if (modo == 1) {
+				dibujarSinColor();
+			}
+			else if (modo == 2) {
+				dibujarColor();
+			}
+			glFlush();
+			break;
+
+		case GLUT_KEY_RIGHT:
+			glClear(GL_COLOR_BUFFER_BIT);
+			glFlush();
+
+			glTranslatef(20, 0.0, 0.0f);
+			if (modo == 1) {
+				dibujarSinColor();
+			}
+			else if (modo == 2) {
+				dibujarColor();
+			}
+			glFlush();
+			break;
+
+		}
+
+
+	}
+}
+
+
 
 void main(int argc, char** argv) 
 { 
@@ -404,13 +604,16 @@ void main(int argc, char** argv)
 	glutInitWindowPosition(100, 150); 
 	glutCreateWindow("Proyecto #2"); 
 	myInit(); 
+	glutSpecialFunc(pan);
+	glutKeyboardFunc(teclado);
 	glutCreateMenu(menu);
 	glutAddMenuEntry(" Mapa sin colorear", 1);
 	glutAddMenuEntry(" Mapa coloreado", 2);
 	glutAddMenuEntry(" Mapa con texturas", 3);
-	glutAddMenuEntry(" Salir", 4);
+	glutAddMenuEntry(" Reiniciar", 4);
+	glutAddMenuEntry(" Salir", 5);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
-	 
+	
 	
 	glutMainLoop(); 
 	fclose(fp); 
