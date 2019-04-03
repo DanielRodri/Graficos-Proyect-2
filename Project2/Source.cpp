@@ -1,13 +1,18 @@
 // CPP program to illustrate 
-// Scanline Polygon fill Algorithm 
+// Scanline Polygon fill Algorithm
+#include "stdafx.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <stdio.h> 
 #include <conio.h>
 #include <math.h> 
 #include <GL/glut.h> 
-#define maxHt 500 
-#define maxWd 500
-#define maxVer 3500 
+#define maxHt 350 
+#define maxWd 350 
+#define maxVer 500 
 
 FILE *fp; 
 int modo = 0;
@@ -30,6 +35,135 @@ typedef struct edgetabletup
 }EdgeTableTuple; 
 
 EdgeTableTuple EdgeTable[maxHt], ActiveEdgeTuple; 
+
+typedef GLubyte Pixel[3]; /*represents red green blue*/
+
+
+int Width, Height; /*of image*/
+
+/*array of pixels*/
+Pixel *Image;
+
+/*name of image file*/
+char *Filename = "default.ppm";
+
+int allowedSize(int x)
+/*returns max power of 2 <= x*/
+{
+	int r;
+
+	r = 1;
+	while (r < x) r = (r << 1);
+
+	if (r == x) return r;
+	else return r >> 1;
+}
+
+void readImage(void)
+/*reads the image file assumes ppm format*/
+{
+	
+	int w, h, max;
+	int i, j;
+	unsigned int r, g, b;
+	int k;
+	char ch;
+	FILE *fp;
+
+	fp = fopen(Filename, "r");
+
+	printf("filename = %s\n", Filename);
+
+	/*read the header*/
+
+	fscanf(fp, "P%c\n", &ch);
+	if (ch != '3') {
+		fprintf(stderr, "Only ascii mode 3 channel PPM files");
+		exit(-1);
+	}
+
+	/*strip comment lines*/
+	ch = getc(fp);
+	while (ch == '#') {
+		do {
+			ch = getc(fp);
+		} while (ch != '\n');
+		ch = getc(fp);
+	}
+	ungetc(ch, fp);
+
+	/*read the width*/
+	fscanf(fp, "%d", &w);
+
+	/*read the height*/
+	fscanf(fp, "%d", &h);
+
+	/*max intensity - not used here*/
+	fscanf(fp, "%d", &max);
+
+	/*width and height must be powers of 2 - taking the simple option
+	here of finding the max power of 2 <= w and h*/
+
+	Width = allowedSize(w);
+	Height = allowedSize(h);
+
+	printf("Width = %d, Height = %d\n", Width, Height);
+
+	Image = (Pixel *)malloc(Width*Height * sizeof(Pixel));
+
+
+	for (i = 0; i < Height; ++i) {
+		for (j = 0; j < Width; ++j) {
+			fscanf(fp, "%d %d %d", &r, &g, &b);
+			k = i * Width + j; /*ok, can be more efficient here!*/
+			(*(Image + k))[0] = (GLubyte)r;
+			(*(Image + k))[1] = (GLubyte)g;
+			(*(Image + k))[2] = (GLubyte)b;
+		}
+		/*better scan to the end of the row*/
+		for (j = Width; j < w; ++j) fscanf(fp, "%c %c %c", &r, &g, &b);
+	}
+	fclose(fp);
+}
+
+
+void initialiseTextures(void)
+{
+	GLint level = 0;      /*only one level - no level of detail*/
+	GLint components = 3; /*3 means R, G, and B components only*/
+	GLint border = 0;     /*no border around the image*/
+
+	/*read the image file*/
+	readImage();
+
+	/*each pixelrow on a byte alignment boundary*/
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	/*define information about the image*/
+	glTexImage2D(GL_TEXTURE_2D, level, components,
+		(GLsizei)Width, (GLsizei)Height,
+		border, GL_RGB, GL_UNSIGNED_BYTE, Image);
+
+	/*ensures that image is not wrapped*/
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+	/*chooses mapping type from texels to pixels*/
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	/*this says for minification and magnfication choose texel that
+	GL_NEAREST chooses the texel nearest the centre of the pixel
+	is nearest to the centre of the pixel, rather than GL_LINEAR which
+	performs a linear interpolation on the 4 surrounding texels*/
+
+	/*GL_DECAL - this says overwrite pixel with texture colour*/
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	/*an alternative is GL_MODULATE which modulates the lighting
+	by the texel value by multiplication*/
+
+	/*this enables texturing*/
+	glEnable(GL_TEXTURE_2D);
+}
 
 
 // Scanline Function 
@@ -163,16 +297,203 @@ void updatexbyslopeinv(EdgeTableTuple *Tup)
 	} 
 } 
 
+int * limits(char x[10]) {
+	int * limites= new int[4] ;
+	errno_t err;
+	if ((err = fopen_s(&fp, x, "r")) != 0)
+	{
+		printf("Could not open file");
+		return {};
+	}
+
+	glColor3f(1.0f, 0.0f, 0.0f);
+	int count = 0, x1, y1;
+	rewind(fp);
+	while (!feof(fp)) {
+		count++;
+		if (count == 1)
+		{
+			fscanf_s(fp, "%d,%d", &limites[0], &limites[1]);
+			limites[2] = limites[0];
+			limites[3] = limites[1];
+		}
+		else
+		{
+			fscanf_s(fp, "%d,%d", &x1, &y1);
+			if (x1 > limites[2]) {
+				limites[2] = x1;
+			}
+			else if (x1< limites[0]) {
+				limites[0] = x1;
+			}
+			if (y1 > limites[3]) {
+				limites[3] = y1;
+			}
+			else if (y1 < limites[1]) {
+				limites[1] = y1;
+			}
+		}
+	}
+	return limites;
+}
+
+void TextureFill(char provincia[10])
+{
+	int * limites = limits(provincia);
+	//cout << "minX: " << limites[0] << "minY: " << limites[1] << "maxX: " << limites[2] << "maxY: " << limites[3];
+	float largoX = limites[2] - limites[0];
+	float largoY = limites[3] - limites[1];
+	/* Follow the following rules:
+	1. Horizontal edges: Do not include in edge table
+	2. Horizontal edges: Drawn either on the bottom or on the top.
+	3. Vertices: If local max or min, then count twice, else count
+		once.
+	4. Either vertices at local minima or at local maxima are drawn.*/
+
+	int i, j, x1, ymax1, x2, ymax2, FillFlag = 0, coordCount;
+
+	// we will start from scanline 0; 
+	// Repeat until last scanline: 
+	for (i = 0; i < maxHt; i++)//4. Increment y by 1 (next scan line) 
+	{
+
+		// 1. Move from ET bucket y to the 
+		// AET those edges whose ymin = y (entering edges) 
+		for (j = 0; j < EdgeTable[i].countEdgeBucket; j++)
+		{
+			storeEdgeInTuple(&ActiveEdgeTuple, EdgeTable[i].buckets[j].
+				ymax, EdgeTable[i].buckets[j].xofymin,
+				EdgeTable[i].buckets[j].slopeinverse);
+		}
+
+		// 2. Remove from AET those edges for 
+		// which y=ymax (not involved in next scan line) 
+		removeEdgeByYmax(&ActiveEdgeTuple, i);
+
+		//sort AET (remember: ET is presorted) 
+		insertionSort(&ActiveEdgeTuple);
+
+
+
+		//3. Fill lines on scan line y by using pairs of x-coords from AET 
+		j = 0;
+		FillFlag = 0;
+		coordCount = 0;
+		x1 = 0;
+		x2 = 0;
+		ymax1 = 0;
+		ymax2 = 0;
+		while (j < ActiveEdgeTuple.countEdgeBucket)
+		{
+			if (coordCount % 2 == 0)
+			{
+				x1 = (int)(ActiveEdgeTuple.buckets[j].xofymin);
+				ymax1 = ActiveEdgeTuple.buckets[j].ymax;
+				if (x1 == x2)
+				{
+					/* three cases can arrive-
+						1. lines are towards top of the intersection
+						2. lines are towards bottom
+						3. one line is towards top and other is towards bottom
+					*/
+					if (((x1 == ymax1) && (x2 != ymax2)) || ((x1 != ymax1) && (x2 == ymax2)))
+					{
+						x2 = x1;
+						ymax2 = ymax1;
+					}
+
+					else
+					{
+						coordCount++;
+					}
+				}
+
+				else
+				{
+					coordCount++;
+				}
+			}
+			else
+			{
+				x2 = (int)ActiveEdgeTuple.buckets[j].xofymin;
+				ymax2 = ActiveEdgeTuple.buckets[j].ymax;
+
+				FillFlag = 0;
+
+				// checking for intersection... 
+				if (x1 == x2)
+				{
+					/*three cases can arive-
+						1. lines are towards top of the intersection
+						2. lines are towards bottom
+						3. one line is towards top and other is towards bottom
+					*/
+					if (((x1 == ymax1) && (x2 != ymax2)) || ((x1 != ymax1) && (x2 == ymax2)))
+					{
+						x1 = x2;
+						ymax1 = ymax2;
+					}
+					else
+					{
+						coordCount++;
+						FillFlag = 1;
+					}
+				}
+				else
+				{
+					coordCount++;
+					FillFlag = 1;
+				}
+
+
+				if (FillFlag)
+				{
+					//drawing actual lines... 
+						glBegin(GL_LINES);
+						/*
+						cout << "\n";
+						cout << x1 << "-" << x2 <<"\n";
+						cout << limites[2] << "-" << limites[0] << "\n";
+						cout << ((float)(limites[2] - x1) / (float)(limites[2] - limites[0])) << "<->" << 1.0-((float)(limites[3] - i) / (float)(limites[3] - limites[1])) << "\n";
+						cout << ((float)(limites[2] - x2) / (float)(limites[2] - limites[0])) << "<->" << 1.0-((float)(limites[3] - i) / (float)(limites[3] - limites[1])) << "\n";
+						*/
+						glTexCoord2f(1.0-((float)(limites[2] - x1) / largoX), ((float)(limites[3] - i) / largoY));
+						glVertex2i(x1, i);
+
+						glTexCoord2f(1.0-((float)(limites[2] - x2) / largoX), ((float)(limites[3] - i) / largoY));
+						glVertex2i(x2, i);
+
+						glEnd();
+						glFlush();
+					
+
+
+				}
+
+			}
+
+			j++;
+		}
+
+
+		// 5. For each nonvertical edge remaining in AET, update x for new y 
+		updatexbyslopeinv(&ActiveEdgeTuple);
+	}
+
+
+
+}
+
 
 void ScanlineFill(float R, float G, float B)
 { 
+	
 	/* Follow the following rules: 
 	1. Horizontal edges: Do not include in edge table 
 	2. Horizontal edges: Drawn either on the bottom or on the top. 
 	3. Vertices: If local max or min, then count twice, else count 
 		once. 
 	4. Either vertices at local minima or at local maxima are drawn.*/
-
 
 	int i, j, x1, ymax1, x2, ymax2, FillFlag = 0, coordCount; 
 	
@@ -270,29 +591,33 @@ void ScanlineFill(float R, float G, float B)
 				} 
 			
 			
-			if(FillFlag) 
-			{ 
-				//drawing actual lines... 
-				glColor3f(R,G,B); 
+				if(FillFlag) 
+				{ 
+					//drawing actual lines... 
+					glColor3f(R,G,B); 
 				
-				glBegin(GL_LINES); 
-				glVertex2i(x1,i); 
-				glVertex2i(x2,i); 
-				glEnd(); 
-				glFlush();		 
+					glBegin(GL_LINES);
+					glTexCoord2f(0.0, i);
+					glVertex2i(x1,i); 
+
+					glTexCoord2f(1.0, i);
+					glVertex2i(x2,i); 
 				
+					glEnd(); 
+					glFlush();		 
+				
+			
+				} 
 			
 			} 
 			
+			j++; 
 		} 
 			
-		j++; 
-	} 
-			
 		
-	// 5. For each nonvertical edge remaining in AET, update x for new y 
-	updatexbyslopeinv(&ActiveEdgeTuple); 
-} 
+		// 5. For each nonvertical edge remaining in AET, update x for new y 
+		updatexbyslopeinv(&ActiveEdgeTuple); 
+	} 
 
 
 
@@ -308,6 +633,7 @@ void myInit(void)
 	glLoadIdentity(); 
 	gluOrtho2D(0,maxHt,0,maxWd); 
 	glClear(GL_COLOR_BUFFER_BIT); 
+	//initialiseTextures();
 } 
 
 void drawPolyDino(char x[100]) 
@@ -341,8 +667,8 @@ void drawPolyDino(char x[100])
 			fscanf_s(fp, "%d,%d", &x2, &y2); 
 			
 			glBegin(GL_LINES); 
-				glVertex2i( x1+100, y1); 
-				glVertex2i( x2+100, y2); 
+				glVertex2i( x1, y1); 
+				glVertex2i( x2, y2); 
 			glEnd(); 
 			storeEdgeInTable(x1+100, y1, x2+100, y2);//storage of edges in edge table. 
 			
@@ -353,55 +679,6 @@ void drawPolyDino(char x[100])
 		
 		
 } 
-
-void dibujarColor() {
-	initEdgeTable();
-	drawPolyDino("alajuela.txt");
-	ScanlineFill(1.0, 0.0, 0.0);
-	initEdgeTable();
-	drawPolyDino("heredia.txt");
-	ScanlineFill(1.0, 1.0, 0.0);
-	initEdgeTable();
-	drawPolyDino("sanjose.txt");
-	ScanlineFill(1.0, 0.0, 1.0);
-	initEdgeTable();
-	drawPolyDino("cartago.txt");
-	ScanlineFill(0.0, 1.0, 1.0);
-	initEdgeTable();
-	drawPolyDino("limon.txt");
-	ScanlineFill(0.5, 1.0, 0.5);
-	initEdgeTable();
-	drawPolyDino("puntarenas.txt");
-	ScanlineFill(1.0, 0.5, 0.0);
-	initEdgeTable();
-	drawPolyDino("Guanacaste.txt");
-	ScanlineFill(0.0, 1.0, 0.0);
-}
-
-void dibujarSinColor() {
-	
-	drawPolyDino("alajuela.txt");
-	
-	drawPolyDino("heredia.txt");
-	
-	drawPolyDino("sanjose.txt");
-	
-	drawPolyDino("cartago.txt");
-	
-	drawPolyDino("limon.txt");
-	
-	drawPolyDino("puntarenas.txt");
-	
-	drawPolyDino("Guanacaste.txt");
-
-
-
-}
-
-
-
-
-
 
 void menu(int i) 
 {
@@ -424,7 +701,7 @@ void menu(int i)
 	
 	}
 	else if (i == 3) {
-		
+	
 	}
 	else if (i == 4) {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -618,3 +895,46 @@ void main(int argc, char** argv)
 	glutMainLoop(); 
 	fclose(fp); 
 } 
+
+
+#include <iostream>
+using namespace std;
+#define maxHt 350 
+#define maxWd 350 
+#define maxVer 500 
+			
+				glVertex2i( x1, y1); 
+				
+				glVertex2i( x2, y2); 
+
+		glClear(GL_COLOR_BUFFER_BIT);
+		glFlush();
+		initialiseTextures();
+
+		initEdgeTable();
+		drawPolyDino("alajuela.txt");
+		TextureFill("alajuela.txt");
+
+		initEdgeTable();
+		drawPolyDino("heredia.txt");
+		TextureFill("heredia.txt");
+
+		initEdgeTable();
+		drawPolyDino("sanjose.txt");
+		TextureFill("sanjose.txt");
+
+		initEdgeTable();
+		drawPolyDino("cartago.txt");
+		TextureFill("cartago.txt");
+
+		initEdgeTable();
+		drawPolyDino("limon.txt");
+		TextureFill("limon.txt");
+
+		initEdgeTable();
+		drawPolyDino("puntarenas.txt");
+		TextureFill("puntarenas.txt");
+
+		initEdgeTable();
+		drawPolyDino("Guanacaste.txt");
+		TextureFill("Guanacaste.txt");

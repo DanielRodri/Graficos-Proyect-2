@@ -1,4 +1,20 @@
+<<<<<<< Updated upstream
 ﻿  Source.cpp
 c:\users\usuario\documents\visual studio 2015\projects\project2\project2\source.cpp(190): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
   Project2.vcxproj -> C:\Users\Usuario\Documents\Visual Studio 2015\Projects\Project2\Debug\Project2.exe
   Project2.vcxproj -> C:\Users\Usuario\Documents\Visual Studio 2015\Projects\Project2\Debug\Project2.pdb (Partial PDB)
+=======
+﻿  Source.cpp
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(126): warning C4477: 'fscanf' : la cadena de formato '%c' requiere un argumento de tipo 'char *', pero el argumento variádico 1 tiene el tipo 'unsigned int *'
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(126): warning C4477: 'fscanf' : la cadena de formato '%c' requiere un argumento de tipo 'char *', pero el argumento variádico 2 tiene el tipo 'unsigned int *'
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(126): warning C4477: 'fscanf' : la cadena de formato '%c' requiere un argumento de tipo 'char *', pero el argumento variádico 3 tiene el tipo 'unsigned int *'
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(345): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(346): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(366): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(461): warning C4244: 'argumento': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(464): warning C4244: 'argumento': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(511): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(601): warning C4244: 'argumento': conversión de 'int' a 'GLfloat'; posible pérdida de datos
+c:\users\juanr\documents\openglroot\graficos-proyect-2\project2\source.cpp(604): warning C4244: 'argumento': conversión de 'int' a 'GLfloat'; posible pérdida de datos
+  Project2.vcxproj -> C:\Users\juanr\Documents\OpenGLRoot\Graficos-Proyect-2\Debug\Project2.exe
+>>>>>>> Stashed changes
