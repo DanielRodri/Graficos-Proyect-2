@@ -19,6 +19,25 @@ using namespace std;
 
 FILE *fp; 
 int modo = 0;
+
+struct ProvinceCoord {
+	int x;
+	int y;
+	ProvinceCoord *sig;
+};
+
+struct Province {
+	char *name;
+	int maxX;
+	int minX;
+	int maxY;
+	int minY;
+	struct ProvinceCoord *provinceCoords;
+	Province *sig;
+};
+Province *provincesList;
+
+//Province * provincesList 
 // Start from lower left corner 
 typedef struct edgebucket 
 { 
@@ -300,52 +319,19 @@ void updatexbyslopeinv(EdgeTableTuple *Tup)
 	} 
 } 
 
-int * limits(char x[10]) {
-	int * limites= new int[4] ;
-	errno_t err;
-	if ((err = fopen_s(&fp, x, "r")) != 0)
-	{
-		printf("Could not open file");
-		return {};
-	}
-
-	glColor3f(1.0f, 0.0f, 0.0f);
-	int count = 0, x1, y1;
-	rewind(fp);
-	while (!feof(fp)) {
-		count++;
-		if (count == 1)
-		{
-			fscanf_s(fp, "%d,%d", &limites[0], &limites[1]);
-			limites[2] = limites[0];
-			limites[3] = limites[1];
-		}
-		else
-		{
-			fscanf_s(fp, "%d,%d", &x1, &y1);
-			if (x1 > limites[2]) {
-				limites[2] = x1;
-			}
-			else if (x1< limites[0]) {
-				limites[0] = x1;
-			}
-			if (y1 > limites[3]) {
-				limites[3] = y1;
-			}
-			else if (y1 < limites[1]) {
-				limites[1] = y1;
-			}
-		}
-	}
-	return limites;
-}
-
 void TextureFill(char provincia[10])
 {
-	int * limites = limits(provincia);
+	Province *aux = new Province;
+	aux = provincesList;
+
+	while (aux->name != provincia)
+	{
+		aux = aux->sig;
+	}
+
 	//cout << "minX: " << limites[0] << "minY: " << limites[1] << "maxX: " << limites[2] << "maxY: " << limites[3];
-	float largoX = limites[2] - limites[0];
-	float largoY = limites[3] - limites[1];
+	float largoX = aux->maxX - aux->minX;
+	float largoY = aux->maxY - aux->minY;
 	/* Follow the following rules:
 	1. Horizontal edges: Do not include in edge table
 	2. Horizontal edges: Drawn either on the bottom or on the top.
@@ -460,10 +446,10 @@ void TextureFill(char provincia[10])
 						cout << ((float)(limites[2] - x1) / (float)(limites[2] - limites[0])) << "<->" << 1.0-((float)(limites[3] - i) / (float)(limites[3] - limites[1])) << "\n";
 						cout << ((float)(limites[2] - x2) / (float)(limites[2] - limites[0])) << "<->" << 1.0-((float)(limites[3] - i) / (float)(limites[3] - limites[1])) << "\n";
 						*/
-						glTexCoord2f(1.0-((float)(limites[2] - x1) / largoX), ((float)(limites[3] - i) / largoY));
+						glTexCoord2f(1.0-((float)(aux->maxX - x1) / largoX), ((float)(aux->maxY - i) / largoY));
 						glVertex2i(x1, i);
 
-						glTexCoord2f(1.0-((float)(limites[2] - x2) / largoX), ((float)(limites[3] - i) / largoY));
+						glTexCoord2f(1.0-((float)(aux->maxX - x2) / largoX), ((float)(aux->maxY - i) / largoY));
 						glVertex2i(x2, i);
 
 						glEnd();
@@ -639,48 +625,60 @@ void myInit(void)
 	initialiseTextures();
 } 
 
-void drawPolyDino(char x[100]) 
+void drawPolyDino(char x[10]) 
 { 
+	glColor3f(1.0f, 0.0f, 0.0f);
+	Province *aux = new Province;
+	aux = provincesList;
 
-	errno_t err;
-	if ((err = fopen_s(&fp, x, "r")) != 0)
-	{
-		printf("Could not open file");
-		return;
+	//cout << provincesList->name;
+	//cout << "->" << aux->name << "--" << x << "\n";
+
+
+	while(aux->name != x) 
+	{ 
+		aux = aux->sig;
 	}
 
-	glColor3f(1.0f,0.0f,0.0f); 
-	int count = 0,x1,y1,x2,y2; 
-	rewind(fp); 
-	while(!feof(fp) ) 
-	{ 
-		count++; 
-		if (count>2) 
-		{ 
-			x1 = x2; 
-			y1 = y2; 
-			count=2; 
-		} 
-		if (count==1) 
-		{ 
-			fscanf_s(fp, "%d,%d", &x1, &y1); 
-		} 
+	ProvinceCoord *auxC = new ProvinceCoord();
+	auxC = aux->provinceCoords;
+	int count = 0,x1,x2,y1,y2;
+	while (auxC != NULL) {
+		count++;
+		if (count > 2)
+		{
+			x1 = x2;
+			y1 = y2;
+			count = 2;
+		}
+		if (count == 1)
+		{
+			x1 = auxC->x;
+			y1 = auxC->y;
+		}
 		else
-		{ 
-			fscanf_s(fp, "%d,%d", &x2, &y2); 
-			
-			glBegin(GL_LINES); 
+		{
+			auxC = auxC->sig;
+			if (auxC == NULL) {//quiere decir que vuelve al primero, termina forma
+				x2 = aux->provinceCoords->x;
+				y2 = aux->provinceCoords->y;
+			}
+			else {
+				x2 = auxC->x;
+				y2 = auxC->y;
+				auxC = auxC->sig;
+			}
+			glBegin(GL_LINES);
 			glVertex2i(x1, y1);
 
 			glVertex2i(x2, y2);
-			glEnd(); 
+			glEnd();
 			storeEdgeInTable(x1, y1, x2, y2);//storage of edges in edge table. 
-			
+
 			
 			//glFlush(); 
-		} 
-	} 
-		
+		}
+	}
 		
 } 
 void dibujarColor() {
@@ -703,7 +701,7 @@ void dibujarColor() {
 	drawPolyDino("puntarenas.txt");
 	ScanlineFill(1.0, 0.5, 0.0);
 	initEdgeTable();
-	drawPolyDino("Guanacaste.txt");
+	drawPolyDino("guanacaste.txt");
 	ScanlineFill(0.0, 1.0, 0.0);
 }
 
@@ -721,7 +719,7 @@ void dibujarSinColor() {
 
 	drawPolyDino("puntarenas.txt");
 
-	drawPolyDino("Guanacaste.txt");
+	drawPolyDino("guanacaste.txt");
 
 }
 
@@ -751,8 +749,8 @@ void dibujarTextura() {
 	TextureFill("puntarenas.txt");
 
 	initEdgeTable();
-	drawPolyDino("Guanacaste.txt");
-	TextureFill("Guanacaste.txt");
+	drawPolyDino("guanacaste.txt");
+	TextureFill("guanacaste.txt");
 }
 
 void menu(int i) 
@@ -983,10 +981,114 @@ void pan(int key, int x, int y) {
 	}
 }
 
+void insertProvince(Province *&list, char name[10]) {
+	//ProvinceCoord *asd = new ProvinceCoord();
+	//asd->x = 1;
+	//asd->y = 2;
+	Province *province = new Province();
+	ProvinceCoord *provinceC = new ProvinceCoord();
+	province->name = name;
+	province->provinceCoords = provinceC;
 
+	
 
+	//--------------------------------------------------------------------
+	//int * limites = new int[4];
+	errno_t err;
+	if ((err = fopen_s(&fp, name, "r")) != 0)
+	{
+		printf("Could not open file");
+		return;
+	}
+
+	glColor3f(1.0f, 0.0f, 0.0f);
+	int count = 0, x1, y1, x2, y2;
+	rewind(fp);
+	while (!feof(fp)) {
+		count++;
+		if (count == 1)
+		{
+			fscanf_s(fp, "%d,%d", &x1, &y1);
+			x2 = x1;
+			y2 = y1;
+			provinceC->x = x1;
+			provinceC->y = y1;
+			province->maxX = x1;
+			province->minX = x1;
+			province->maxY = y1;
+			province->minY = y1;
+			//provinceCaux = provinceC;
+		}
+		else
+		{
+			provinceC->sig = new ProvinceCoord();
+			provinceC = provinceC->sig;
+			fscanf_s(fp, "%d,%d", &x1, &y1);
+			provinceC->x = x1;
+			provinceC->y = y1;
+			if (x1 > province->maxX) {
+				province->maxX = x1;
+			}
+			else if (x1 < province->minX) {
+				province->minX = x1;
+			}
+			if (y1 > province->maxY) {
+				province->maxY = y1;
+			}
+			else if (y1 < province->minY) {
+				province->minY = y1;
+			}
+		}
+		//provinceC = provinceC->sig;
+		//provinceC = NULL;
+	}
+
+	//-------------------------------------------------------------------------
+
+	Province *aux1 = list;
+	Province *aux2 = NULL;
+
+	while (aux1 != NULL) {
+		aux2 = aux1;
+		aux1 = aux1->sig;
+	}
+	if (aux1 == list) {
+		list = province;
+	}
+	else {
+		aux2->sig = province;
+	}
+	province->sig = NULL;//aux1 == null
+}
+
+void mostrar() {
+	Province *actual = new Province();
+	actual = provincesList;
+	ProvinceCoord *actualC = new ProvinceCoord();
+
+	while (actual != NULL) {
+		cout << "\n" << "Provincia" << "\n";
+		cout << actual->minX << "<->" << actual->maxX << "\n";
+		cout << actual->minY << "<->" << actual->maxY << "\n";
+		actualC = actual->provinceCoords;
+		while (actualC != NULL) {
+			cout << actualC->x << "<->" << actualC->y << "...";
+			actualC = actualC->sig;
+		}
+		actual = actual->sig;
+	}
+}
 void main(int argc, char** argv) 
 { 
+	insertProvince(provincesList, "alajuela.txt");
+	insertProvince(provincesList, "heredia.txt");
+	insertProvince(provincesList, "sanjose.txt");
+	insertProvince(provincesList, "cartago.txt");
+	insertProvince(provincesList, "limon.txt");
+	insertProvince(provincesList, "puntarenas.txt");
+	insertProvince(provincesList, "guanacaste.txt");
+	//mostrar();
+	//cin.get();
 	
 	glutInit(&argc, argv); 
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); 
@@ -1006,7 +1108,7 @@ void main(int argc, char** argv)
 	
 	
 	glutMainLoop(); 
-	fclose(fp); 
+	fclose(fp);
 } 
 				
 
